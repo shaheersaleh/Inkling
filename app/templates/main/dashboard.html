@@ -1,0 +1,193 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - NotesApp{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- Welcome Header -->
+    <div class="bg-gradient-to-br from-lapis_lazuli to-indigo_dye overflow-hidden shadow-lg rounded-lg mb-6">
+        <div class="px-4 py-5 sm:p-6">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    {% if current_user.profile_image_data %}
+                        <img src="{{ url_for('profile.profile_image', user_id=current_user.id) }}" 
+                             alt="Profile" 
+                             class="h-12 w-12 rounded-full object-cover">
+                    {% else %}
+                        <div class="h-12 w-12 rounded-full bg-gradient-to-r from-sky_blue to-cerulean flex items-center justify-center">
+                            <span class="text-white font-bold text-lg">{{ current_user.username[0].upper() }}</span>
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="ml-5 w-0 flex-1">
+                    <dl>
+                        <dt class="text-sm font-medium text-platinum truncate">Welcome back,</dt>
+                        <dd class="text-lg font-medium text-white">{{ current_user.username }}</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Overview -->
+    <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 mb-6">
+        <!-- Total Notes -->
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="p-5">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-sticky-note text-gray-400 text-2xl"></i>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Total Notes</dt>
+                            <dd class="text-lg font-medium text-gray-900">{{ notes_count }}</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-gray-50 px-5 py-3">
+                <div class="text-sm">
+                    <a href="{{ url_for('notes.list_notes') }}" class="font-medium text-primary hover:text-blue-500">
+                        View all notes
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Subjects -->
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="p-5">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-tags text-gray-400 text-2xl"></i>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Subjects</dt>
+                            <dd class="text-lg font-medium text-gray-900">{{ subjects_count }}</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-gray-50 px-5 py-3">
+                <div class="text-sm">
+                    <a href="{{ url_for('subjects.list_subjects') }}" class="font-medium text-primary hover:text-blue-500">
+                        Manage subjects
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="p-5">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-bolt text-gray-400 text-2xl"></i>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Quick Actions</dt>
+                            <dd class="text-lg font-medium text-gray-900">Available</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-gray-50 px-5 py-3">
+                <div class="flex space-x-3">
+                    <a href="{{ url_for('notes.create_note') }}" 
+                       class="btn-gradient inline-flex items-center px-3 py-1.5 text-sm font-medium rounded-full text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky_blue">
+                        <i class="fas fa-plus mr-1"></i>
+                        New Note
+                    </a>
+                    <a href="{{ url_for('subjects.create_subject') }}" 
+                       class="inline-flex items-center px-3 py-1.5 text-sm font-medium rounded-full border border-cerulean text-cerulean bg-white hover:bg-cerulean hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cerulean transition-all duration-200">
+                        <i class="fas fa-folder-plus mr-1"></i>
+                        New Subject
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Notes -->
+    <div class="bg-white shadow overflow-hidden sm:rounded-md">
+        <div class="px-4 py-5 sm:px-6">
+            <h3 class="text-lg leading-6 font-medium text-gray-900">Recent Notes</h3>
+            <p class="mt-1 max-w-2xl text-sm text-gray-500">Your most recently updated notes</p>
+        </div>
+        {% if recent_notes %}
+        <ul class="divide-y divide-gray-200">
+            {% for note in recent_notes %}
+            <li>
+                <a href="{{ url_for('notes.view_note', note_id=note.id) }}" class="block hover:bg-gray-50">
+                    <div class="px-4 py-4 sm:px-6">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0">
+                                    {% if note.subject %}
+                                    <div class="h-3 w-3 rounded-full" style="background-color: {{ note.subject.color }}"></div>
+                                    {% else %}
+                                    <div class="h-3 w-3 rounded-full bg-gray-400"></div>
+                                    {% endif %}
+                                </div>
+                                <div class="ml-4">
+                                    <p class="text-sm font-medium text-gray-900">{{ note.title }}</p>
+                                    <p class="text-sm text-gray-500">
+                                        {% if note.subject %}
+                                            {{ note.subject.name }}
+                                        {% else %}
+                                            No Subject
+                                        {% endif %}
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="flex items-center text-sm text-gray-500">
+                                <i class="fas fa-clock mr-1"></i>
+                                {{ note.updated_at.strftime('%b %d, %Y') }}
+                            </div>
+                        </div>
+                        <div class="mt-2">
+                            <p class="text-sm text-gray-600 line-clamp-2">
+                                {{ note.content[:150] }}{% if note.content|length > 150 %}...{% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </a>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <div class="px-4 py-12 text-center">
+            <i class="fas fa-sticky-note text-gray-300 text-4xl mb-4"></i>
+            <h3 class="text-lg font-medium text-gray-900 mb-2">No notes yet</h3>
+            <p class="text-gray-500 mb-4">Get started by creating your first note</p>
+            <a href="{{ url_for('notes.create_note') }}" 
+               class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary hover:bg-blue-700">
+                <i class="fas fa-plus mr-2"></i>
+                Create Your First Note
+            </a>
+        </div>
+        {% endif %}
+        
+        {% if recent_notes %}
+        <div class="bg-gray-50 px-4 py-3 text-center">
+            <a href="{{ url_for('notes.list_notes') }}" class="text-sm font-medium text-primary hover:text-blue-500">
+                View all notes →
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+.line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+</style>
+{% endblock %}

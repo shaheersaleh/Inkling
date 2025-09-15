@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block title %}Profile - Notes App{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-4xl mx-auto">
+        <!-- Profile Header -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <div class="flex items-center space-x-6">
+                <!-- Profile Image -->
+                <div class="w-24 h-24 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
+                    {% if user.profile_image_data %}
+                        <img src="{{ url_for('profile.profile_image', user_id=user.id) }}" 
+                             alt="Profile Image" 
+                             class="w-full h-full object-cover">
+                    {% else %}
+                        <span class="text-3xl font-bold text-gray-600">{{ user.username[0].upper() }}</span>
+                    {% endif %}
+                </div>
+                
+                <!-- Profile Info -->
+                <div class="flex-1">
+                    <h1 class="text-3xl font-bold text-gray-900">{{ user.username }}</h1>
+                    <p class="text-gray-600">{{ user.email }}</p>
+                    <p class="text-sm text-gray-500">Member since {{ user.created_at.strftime('%B %Y') }}</p>
+                </div>
+                
+                <!-- Edit Button -->
+                <div>
+                    <a href="{{ url_for('profile.edit_profile') }}" 
+                       class="bg-primary text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700 flex items-center">
+                        <i class="fas fa-edit mr-2"></i>
+                        Edit Profile
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Profile Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-sticky-note text-3xl text-blue-500"></i>
+                    </div>
+                    <div class="ml-4">
+                        <h3 class="text-lg font-semibold text-gray-900">Notes</h3>
+                        <p class="text-2xl font-bold text-blue-600">{{ user.notes|length }}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-book text-3xl text-green-500"></i>
+                    </div>
+                    <div class="ml-4">
+                        <h3 class="text-lg font-semibold text-gray-900">Subjects</h3>
+                        <p class="text-2xl font-bold text-green-600">{{ user.subjects|length }}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-calendar text-3xl text-purple-500"></i>
+                    </div>
+                    <div class="ml-4">
+                        <h3 class="text-lg font-semibold text-gray-900">Days Active</h3>
+                        <p class="text-2xl font-bold text-purple-600">
+                            {{ (moment().utc() - user.created_at).days if moment else 0 }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Recent Activity -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-bold text-gray-900 mb-4">Recent Notes</h2>
+            {% if user.notes %}
+                <div class="space-y-3">
+                    {% for note in user.notes[:5] %}
+                        <div class="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                            <div class="flex-1">
+                                <h3 class="font-semibold text-gray-900">{{ note.title }}</h3>
+                                <p class="text-sm text-gray-600">{{ note.content[:100] }}{% if note.content|length > 100 %}...{% endif %}</p>
+                                <div class="flex items-center space-x-4 mt-2">
+                                    {% if note.subject %}
+                                        <span class="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800">
+                                            {{ note.subject.name }}
+                                        </span>
+                                    {% endif %}
+                                    <span class="text-xs text-gray-500">{{ note.created_at.strftime('%b %d, %Y') }}</span>
+                                </div>
+                            </div>
+                            <div class="flex space-x-2">
+                                <a href="{{ url_for('notes.view_note', note_id=note.id) }}" 
+                                   class="text-blue-600 hover:text-blue-800">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{{ url_for('notes.edit_note', note_id=note.id) }}" 
+                                   class="text-green-600 hover:text-green-800">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+                {% if user.notes|length > 5 %}
+                    <div class="mt-4 text-center">
+                        <a href="{{ url_for('notes.list_notes') }}" 
+                           class="text-blue-600 hover:text-blue-800 font-medium">
+                            View All Notes →
+                        </a>
+                    </div>
+                {% endif %}
+            {% else %}
+                <div class="text-center py-8">
+                    <i class="fas fa-sticky-note text-6xl text-gray-300 mb-4"></i>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">No notes yet</h3>
+                    <p class="text-gray-600 mb-4">Start creating your first note to see them here.</p>
+                    <a href="{{ url_for('notes.create_note') }}" 
+                       class="bg-primary text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700">
+                        Create Your First Note
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

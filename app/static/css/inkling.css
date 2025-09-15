@@ -1,0 +1,273 @@
+/* Inkling App Custom Styles */
+
+/* Font Face Declaration - Fix font loading */
+@font-face {
+  font-family: 'Apricot';
+  src: url('/static/fonts/Apricot.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Root Variables for Color Palette */
+:root {
+  --lapis-lazuli: #2f6690;
+  --cerulean: #3a7ca5;
+  --platinum: #d9dcd6;
+  --indigo-dye: #16425b;
+  --sky-blue: #81c3d7;
+}
+
+/* Body Background */
+body {
+  background: linear-gradient(135deg, var(--indigo-dye) 0%, var(--lapis-lazuli) 25%, var(--cerulean) 50%, var(--sky-blue) 75%, var(--platinum) 100%);
+  min-height: 100vh;
+  font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Inkling Logo Branding - Darkest Gradient */
+.inkling-logo {
+  font-family: 'Apricot', serif !important;
+  background: linear-gradient(135deg, #0a1015, #16425b, #122839, #0c1921);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: bold;
+  text-shadow: 0 2px 4px rgba(22, 66, 91, 0.3);
+  background-size: 200% 200%;
+  animation: gradientShift 3s ease infinite;
+  line-height: 1.2;
+  padding-bottom: 0.25rem;
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Circular Gradient Buttons - Dark Gradient */
+.btn-gradient {
+  background: linear-gradient(135deg, #16425b, #2f6690, #3a7ca5);
+  border: none;
+  border-radius: 50px !important; /* Make buttons circular/pill-shaped */
+  color: white;
+  font-weight: 600;
+  padding: 12px 24px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(22, 66, 91, 0.3);
+  background-size: 200% 200%;
+  animation: gradientShift 3s ease infinite;
+}
+
+.btn-gradient:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 25px rgba(22, 66, 91, 0.4);
+  color: white;
+}
+
+.btn-gradient:active {
+  transform: translateY(0) scale(0.98);
+}
+
+/* Circular Secondary Button */
+.btn-gradient-outline {
+  background: transparent;
+  border: 2px solid transparent;
+  border-radius: 50px !important; /* Make buttons circular/pill-shaped */
+  background-image: linear-gradient(white, white), linear-gradient(135deg, var(--indigo-dye), var(--lapis-lazuli), var(--cerulean), var(--sky-blue));
+  background-origin: border-box;
+  background-clip: content-box, border-box;
+  color: var(--indigo-dye);
+  font-weight: 600;
+  padding: 10px 22px; /* Slightly less padding due to border */
+  transition: all 0.3s ease;
+}
+
+.btn-gradient-outline:hover {
+  background: linear-gradient(135deg, var(--indigo-dye), var(--lapis-lazuli), var(--cerulean), var(--sky-blue));
+  color: white;
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 25px rgba(22, 66, 91, 0.3);
+}
+
+/* Small Circular Buttons */
+.btn-sm {
+  padding: 8px 16px;
+  font-size: 0.875rem;
+  border-radius: 50px !important;
+}
+
+/* Dark Background Outline Button */
+.btn-outline-light {
+  background: transparent;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50px !important;
+  color: white;
+  font-weight: 600;
+  padding: 10px 22px;
+  transition: all 0.3s ease;
+}
+
+.btn-outline-light:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.5);
+  color: white;
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+}
+
+/* Large Circular Buttons */
+.btn-lg {
+  padding: 16px 32px;
+  font-size: 1.125rem;
+  border-radius: 50px !important;
+}
+
+/* Card Backgrounds */
+.glass-card {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(22, 66, 91, 0.2);
+}
+
+.dark-glass-card {
+  background: rgba(22, 66, 91, 0.2);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(129, 195, 215, 0.3);
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(22, 66, 91, 0.3);
+}
+
+/* Navigation Styling */
+.navbar-gradient {
+  background: linear-gradient(90deg, var(--indigo-dye), var(--lapis-lazuli));
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(129, 195, 215, 0.3);
+}
+
+/* Form Controls with Rounded Edges */
+.form-control-gradient {
+  border: 2px solid transparent;
+  border-radius: 25px;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 12px 20px;
+  transition: all 0.3s ease;
+}
+
+.form-control-gradient:focus {
+  border: 2px solid var(--cerulean);
+  box-shadow: 0 0 0 0.2rem rgba(129, 195, 215, 0.25);
+  background: rgba(255, 255, 255, 1);
+  outline: none;
+}
+
+/* Alert Styling with Rounded Corners */
+.alert-gradient-success {
+  background: linear-gradient(135deg, var(--cerulean), var(--sky-blue));
+  border: 1px solid var(--sky-blue);
+  border-radius: 15px;
+  color: white;
+}
+
+.alert-gradient-danger {
+  background: linear-gradient(135deg, var(--indigo-dye), var(--lapis-lazuli));
+  border: 1px solid var(--lapis-lazuli);
+  border-radius: 15px;
+  color: white;
+}
+
+/* Chat Interface Styling */
+.chat-message-user {
+  background: linear-gradient(135deg, var(--cerulean), var(--sky-blue));
+  border-radius: 20px 20px 5px 20px;
+  color: white;
+}
+
+.chat-message-ai {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(129, 195, 215, 0.3);
+  border-radius: 20px 20px 20px 5px;
+  color: var(--indigo-dye);
+}
+
+/* Utility Classes */
+.text-gradient {
+  background: linear-gradient(135deg, var(--indigo-dye), var(--lapis-lazuli), var(--cerulean), var(--sky-blue));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Hover Effects */
+.hover-scale {
+  transition: transform 0.3s ease;
+}
+
+.hover-scale:hover {
+  transform: scale(1.05);
+}
+
+/* Animation Classes */
+.fade-in {
+  animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.slide-in {
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, var(--lapis-lazuli), var(--cerulean));
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, var(--indigo-dye), var(--lapis-lazuli));
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .inkling-logo {
+    font-size: clamp(1.5rem, 5vw, 2.5rem);
+  }
+  
+  .btn-gradient, .btn-gradient-outline {
+    padding: 10px 20px;
+    font-size: 0.9rem;
+  }
+}
+
+/* Print Styles */
+@media print {
+  body {
+    background: white !important;
+  }
+  
+  .inkling-logo {
+    -webkit-text-fill-color: var(--indigo-dye) !important;
+    color: var(--indigo-dye) !important;
+  }
+}

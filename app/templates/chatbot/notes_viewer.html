@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notes Viewer - Inkling</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/inkling.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --lapis-lazuli: #2E4057;
+            --cerulean: #048A81;
+            --platinum: #B8D4E3;
+            --indigo-dye: #054A29;
+            --sky-blue: #6DB4EE;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-lapis_lazuli to-cerulean min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-2xl font-bold text-indigo_dye mb-2">📚 Notes Viewer</h1>
+                    <p class="text-cerulean">View your source notes from AI conversations</p>
+                </div>
+                <div>
+                    <button onclick="window.close()" 
+                            class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors">
+                        <i class="fas fa-times mr-2"></i>Close Window
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes Container -->
+        <div id="notes-container" class="space-y-6">
+            <!-- Welcome Message -->
+            <div class="bg-white rounded-lg shadow-lg p-8 text-center">
+                <div class="w-16 h-16 bg-lapis_lazuli rounded-full mx-auto mb-4 flex items-center justify-center">
+                    <i class="fas fa-robot text-2xl text-white"></i>
+                </div>
+                <h2 class="text-xl font-semibold text-indigo_dye mb-3">Waiting for Notes...</h2>
+                <p class="text-cerulean mb-4">Ask questions in the AI Assistant to see relevant source notes here.</p>
+                <div class="flex items-center justify-center space-x-2 text-sky_blue">
+                    <div class="w-2 h-2 bg-sky_blue rounded-full animate-bounce"></div>
+                    <div class="w-2 h-2 bg-sky_blue rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                    <div class="w-2 h-2 bg-sky_blue rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Function to update notes display
+        function updateNotesDisplay(data) {
+            const container = document.getElementById('notes-container');
+            
+            if (!data || !data.sources || data.sources.length === 0) {
+                return;
+            }
+
+            // Clear existing content
+            container.innerHTML = '';
+
+            // Add question header if available
+            if (data.question) {
+                const questionDiv = document.createElement('div');
+                questionDiv.className = 'bg-white rounded-lg shadow-lg p-6 mb-4';
+                questionDiv.innerHTML = `
+                    <h2 class="text-lg font-semibold text-indigo_dye mb-2">
+                        <i class="fas fa-question-circle mr-2 text-sky_blue"></i>Query
+                    </h2>
+                    <p class="text-cerulean">${data.question}</p>
+                `;
+                container.appendChild(questionDiv);
+            }
+
+            // Add each source note
+            data.sources.forEach((source, index) => {
+                const noteDiv = document.createElement('div');
+                noteDiv.className = 'bg-white rounded-lg shadow-lg overflow-hidden';
+                
+                const relevanceScore = source.similarity_score ? (source.similarity_score * 100).toFixed(1) : '100';
+                
+                noteDiv.innerHTML = `
+                    <div class="bg-gradient-to-r from-lapis_lazuli to-cerulean p-4">
+                        <div class="flex items-center justify-between text-white">
+                            <h3 class="text-lg font-semibold">
+                                <i class="fas fa-file-alt mr-2"></i>${source.title}
+                            </h3>
+                            <div class="flex items-center space-x-4">
+                                <span class="bg-white/20 px-2 py-1 rounded text-sm">
+                                    ${relevanceScore}% relevant
+                                </span>
+                                <button onclick="openInBrowser(${source.note_id})" 
+                                        class="bg-white/20 hover:bg-white/30 px-3 py-1 rounded transition-colors text-sm">
+                                    <i class="fas fa-external-link-alt mr-1"></i>Open
+                                </button>
+                            </div>
+                        </div>
+                        ${source.subject ? `
+                            <div class="mt-2 flex items-center text-white/80">
+                                <i class="fas fa-tag mr-2"></i>
+                                <span class="text-sm">${source.subject}</span>
+                                ${source.created_at ? `<span class="ml-4 text-sm"><i class="fas fa-calendar mr-1"></i>${source.created_at}</span>` : ''}
+                            </div>
+                        ` : ''}
+                    </div>
+                    
+                    <div class="p-6">
+                        <div class="bg-gray-50 rounded-lg p-4 max-h-96 overflow-y-auto">
+                            <pre class="whitespace-pre-wrap text-indigo_dye font-sans leading-relaxed">${source.content}</pre>
+                        </div>
+                        
+                        <div class="mt-4 flex justify-end space-x-2">
+                            <button onclick="copyToClipboard(\`${source.content.replace(/`/g, '\\`')}\`, this)" 
+                                    class="bg-cerulean text-white px-4 py-2 rounded-lg hover:bg-cerulean/80 transition-colors text-sm">
+                                <i class="fas fa-copy mr-2"></i>Copy Content
+                            </button>
+                            <button onclick="openInBrowser(${source.note_id})" 
+                                    class="bg-sky_blue text-white px-4 py-2 rounded-lg hover:bg-sky_blue/80 transition-colors text-sm">
+                                <i class="fas fa-external-link-alt mr-2"></i>View in App
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                container.appendChild(noteDiv);
+            });
+        }
+
+        // Function to open note in browser
+        function openInBrowser(noteId) {
+            window.open(`/notes/${noteId}`, '_blank');
+        }
+
+        // Function to copy content to clipboard
+        function copyToClipboard(text, button) {
+            navigator.clipboard.writeText(text).then(() => {
+                const originalText = button.innerHTML;
+                button.innerHTML = '<i class="fas fa-check mr-2"></i>Copied!';
+                button.classList.add('bg-green-500');
+                
+                setTimeout(() => {
+                    button.innerHTML = originalText;
+                    button.classList.remove('bg-green-500');
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy text: ', err);
+            });
+        }
+
+        // Listen for messages from parent window
+        window.addEventListener('message', function(event) {
+            if (event.data.type === 'updateNotes') {
+                updateNotesDisplay(event.data.data);
+            }
+        });
+
+        // Check if we have initial data from URL parameters
+        window.addEventListener('load', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const noteId = urlParams.get('noteId');
+            
+            if (noteId) {
+                // Load specific note
+                fetch(`/chatbot/note/${noteId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            const noteData = {
+                                question: `Viewing note: ${data.note.title}`,
+                                sources: [{
+                                    note_id: data.note.id,
+                                    title: data.note.title,
+                                    content: data.note.content,
+                                    subject: data.note.subject,
+                                    created_at: data.note.created_at,
+                                    similarity_score: 1.0
+                                }]
+                            };
+                            updateNotesDisplay(noteData);
+                        }
+                    });
+            }
+        });
+    </script>
+</body>
+</html>

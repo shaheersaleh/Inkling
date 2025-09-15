@@ -1,0 +1,294 @@
+{% extends "base.html" %}
+
+{% block title %}{{ note.title }} - NotesApp{% endblock %}
+
+{% block content %}
+<style>
+.handwriting-note {
+    background: linear-gradient(to bottom, #fef3c7 0%, #fde68a 100%);
+    background-image: 
+        linear-gradient(90deg, rgba(255,255,255,0.1) 50%, transparent 50%),
+        linear-gradient(rgba(0,0,0,0.03) 1px, transparent 1px);
+    background-size: 20px 20px, 100% 20px;
+    position: relative;
+}
+
+.handwriting-note::before {
+    content: '';
+    position: absolute;
+    left: 40px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #ef4444;
+    opacity: 0.3;
+}
+
+.handwriting-text {
+    font-family: 'Dancing Script', 'Brush Script MT', cursive;
+    color: #1e40af;
+    text-shadow: 0.5px 0.5px 0px rgba(0,0,0,0.1);
+    transform: rotate(-0.5deg);
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+</style>
+
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- Note Header -->
+    <div class="bg-white shadow rounded-lg mb-6">
+        <div class="px-4 py-5 sm:p-6">
+            <div class="flex items-start justify-between">
+                <div class="flex-1 min-w-0 pr-4">
+                    <h1 class="text-2xl font-bold text-gray-900 break-words">{{ note.title }}</h1>
+                    <div class="mt-2 flex items-center text-sm text-gray-500 space-x-4 flex-wrap">
+                        {% if note.subject %}
+                        <div class="flex items-center">
+                            <div class="h-3 w-3 rounded-full mr-2" style="background-color: {{ note.subject.color }}"></div>
+                            <span>{{ note.subject.name }}</span>
+                        </div>
+                        {% endif %}
+                        <div class="flex items-center">
+                            <i class="fas fa-clock mr-1"></i>
+                            <span>Created {{ note.created_at.strftime('%B %d, %Y at %I:%M %p') }}</span>
+                        </div>
+                        {% if note.updated_at != note.created_at %}
+                        <div class="flex items-center">
+                            <i class="fas fa-edit mr-1"></i>
+                            <span>Updated {{ note.updated_at.strftime('%B %d, %Y at %I:%M %p') }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                                <div class="flex space-x-3 flex-shrink-0">
+                    <a href="{{ url_for('notes.edit_note', note_id=note.id) }}" 
+                       class="btn-gradient inline-flex items-center px-4 py-2 rounded-full shadow-sm text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky_blue">
+                        <i class="fas fa-edit mr-2"></i>
+                        Edit
+                    </a>
+                    <button data-note-title="{{ note.title }}" 
+                            data-delete-url="{{ url_for('notes.delete_note', note_id=note.id) }}"
+                            class="delete-note-btn inline-flex items-center px-4 py-2 rounded-full shadow-sm text-sm font-medium text-red-700 bg-red-50 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 border border-red-200">
+                        <i class="fas fa-trash mr-2"></i>
+                        Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Main Content -->
+        <div class="lg:col-span-2">
+            <!-- Note Content -->
+            <div class="bg-white shadow rounded-lg mb-6">
+                <div class="px-4 py-5 sm:p-6">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Note Content</h3>
+                    <div class="handwriting-note p-6 rounded-lg border-2 border-amber-300 shadow-lg">
+                        <div class="handwriting-text text-lg leading-relaxed whitespace-pre-wrap ml-12">{{ note.content }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Original Image -->
+            {% if note.original_image_path %}
+            <div class="bg-white shadow rounded-lg">
+                <div class="px-4 py-5 sm:p-6">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Original Image</h3>
+                    <div class="text-center">
+                        <img src="{{ url_for('main.uploaded_file', filename=note.original_image_path) }}" 
+                             alt="Original handwritten note" 
+                             class="max-w-full h-auto border rounded-lg shadow-sm">
+                    </div>
+                    {% if note.confidence_score %}
+                    <div class="mt-4 text-sm text-gray-500">
+                        <div class="flex items-center">
+                            <i class="fas fa-chart-bar mr-2"></i>
+                            <span>Text extraction confidence: {{ "%.1f"|format(note.confidence_score * 100) }}%</span>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Sidebar -->
+        <div class="space-y-6">
+            <!-- Note Info -->
+            <div class="bg-white shadow rounded-lg">
+                <div class="px-4 py-5 sm:p-6">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Note Information</h3>
+                    <dl class="space-y-3">
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Subject</dt>
+                            <dd class="mt-1">
+                                {% if note.subject %}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-white"
+                                      style="background-color: {{ note.subject.color }}">
+                                    {{ note.subject.name }}
+                                </span>
+                                {% else %}
+                                <span class="text-gray-400">No subject assigned</span>
+                                {% endif %}
+                            </dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Created</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ note.created_at.strftime('%B %d, %Y') }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Last Updated</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ note.updated_at.strftime('%B %d, %Y') }}</dd>
+                        </div>
+                        {% if note.extracted_text %}
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Text Extraction</dt>
+                            <dd class="mt-1 text-sm text-gray-900">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                    <i class="fas fa-check mr-1"></i>
+                                    Extracted
+                                </span>
+                            </dd>
+                        </div>
+                        {% endif %}
+                        {% if note.is_embedded %}
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Search Index</dt>
+                            <dd class="mt-1 text-sm text-gray-900">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                    <i class="fas fa-search mr-1"></i>
+                                    Indexed
+                                </span>
+                            </dd>
+                        </div>
+                        {% endif %}
+                    </dl>
+                </div>
+            </div>
+
+            <!-- Similar Notes -->
+            {% if similar_notes %}
+            <div class="bg-white shadow rounded-lg">
+                <div class="px-4 py-5 sm:p-6">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Similar Notes</h3>
+                    <div class="space-y-3">
+                        {% for item in similar_notes %}
+                        <div class="border border-gray-200 rounded-lg p-3">
+                            <div class="flex items-center justify-between">
+                                <a href="{{ url_for('notes.view_note', note_id=item.note.id) }}" 
+                                   class="text-sm font-medium text-primary hover:text-blue-500">
+                                    {{ item.note.title }}
+                                </a>
+                                <span class="text-xs text-gray-500">
+                                    {{ "%.0f"|format(item.relevance_score * 100) }}%
+                                </span>
+                            </div>
+                            {% if item.note.subject %}
+                            <div class="mt-1">
+                                <span class="inline-flex items-center text-xs text-gray-500">
+                                    <div class="h-2 w-2 rounded-full mr-1" style="background-color: {{ item.note.subject.color }}"></div>
+                                    {{ item.note.subject.name }}
+                                </span>
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Quick Actions -->
+            <div class="bg-white shadow rounded-lg">
+                <div class="px-4 py-5 sm:p-6">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Quick Actions</h3>
+                    <div class="space-y-3">
+                        <a href="{{ url_for('notes.create_note') }}" 
+                           class="btn-gradient w-full flex items-center justify-center px-4 py-2 rounded-full shadow-sm text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky_blue">
+                            <i class="fas fa-plus mr-2"></i>
+                            Create New Note
+                        </a>
+                        <a href="{{ url_for('notes.list_notes') }}" 
+                           class="w-full flex items-center justify-center px-4 py-2 rounded-full border border-cerulean text-cerulean bg-white hover:bg-cerulean hover:text-white shadow-sm text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cerulean transition-all duration-200">
+                            <i class="fas fa-list mr-2"></i>
+                            All Notes
+                        </a>
+                        {% if note.subject %}
+                        <a href="{{ url_for('notes.list_notes', subject_id=note.subject.id) }}" 
+                           class="w-full flex items-center justify-center px-4 py-2 rounded-full border border-lapis_lazuli text-lapis_lazuli bg-white hover:bg-lapis_lazuli hover:text-white shadow-sm text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-lapis_lazuli transition-all duration-200">
+                            <i class="fas fa-tag mr-2"></i>
+                            Notes in {{ note.subject.name }}
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div id="deleteModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div class="mt-3 text-center">
+            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
+                <i class="fas fa-exclamation-triangle text-red-600"></i>
+            </div>
+            <h3 class="text-lg font-medium text-gray-900 mt-4">Delete Note</h3>
+            <div class="mt-2 px-7 py-3">
+                <p class="text-sm text-gray-500">
+                    Are you sure you want to delete "<span id="noteName"></span>"? 
+                    This action cannot be undone.
+                </p>
+            </div>
+            <div class="flex justify-center space-x-4 mt-4">
+                <button onclick="closeDeleteModal()" 
+                        class="btn-gradient-outline px-4 py-2">
+                    <i class="fas fa-times mr-2"></i>
+                    Cancel
+                </button>
+                <form id="deleteForm" method="POST" class="inline">
+                    <button type="submit" 
+                            class="inline-flex items-center px-4 py-2 bg-red-500 text-white rounded-full font-medium hover:bg-red-600 transition-all duration-300 hover:scale-105 shadow-lg">
+                        <i class="fas fa-trash mr-2"></i>
+                        Delete
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function confirmDelete(noteName, deleteUrl) {
+    document.getElementById('noteName').textContent = noteName;
+    document.getElementById('deleteForm').action = deleteUrl;
+    document.getElementById('deleteModal').classList.remove('hidden');
+}
+
+function closeDeleteModal() {
+    document.getElementById('deleteModal').classList.add('hidden');
+}
+
+// Handle delete button clicks
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.delete-note-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const noteName = this.getAttribute('data-note-title');
+            const deleteUrl = this.getAttribute('data-delete-url');
+            confirmDelete(noteName, deleteUrl);
+        });
+    });
+});
+
+// Close modal when clicking outside
+document.getElementById('deleteModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeDeleteModal();
+    }
+});
+</script>
+{% endblock %}

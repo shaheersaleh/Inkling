@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Profile - Notes App{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-2xl mx-auto">
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="flex items-center justify-between mb-6">
+                <h1 class="text-2xl font-bold text-gray-900">Edit Profile</h1>
+                <a href="{{ url_for('profile.view_profile') }}" 
+                   class="text-gray-600 hover:text-gray-800">
+                    <i class="fas fa-times text-xl"></i>
+                </a>
+            </div>
+            
+            <form method="POST" enctype="multipart/form-data" class="space-y-6">
+                <!-- Profile Image Upload -->
+                <div class="space-y-2">
+                    <label class="block text-sm font-medium text-gray-700">Profile Image</label>
+                    <div class="flex items-center space-x-6">
+                        <div class="w-20 h-20 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
+                            {% if user.profile_image_data %}
+                                <img src="{{ url_for('profile.profile_image', user_id=user.id) }}" 
+                                     alt="Current Profile Image" 
+                                     class="w-full h-full object-cover"
+                                     id="current-profile-image">
+                            {% else %}
+                                <span class="text-2xl font-bold text-gray-600" id="profile-initials">{{ user.username[0].upper() }}</span>
+                            {% endif %}
+                        </div>
+                        <div class="flex-1">
+                            <input type="file" 
+                                   id="profile_image" 
+                                   name="profile_image" 
+                                   accept="image/*"
+                                   class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                            <p class="text-xs text-gray-500 mt-1">PNG, JPG, GIF up to 16MB</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Username -->
+                <div class="space-y-2">
+                    <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
+                    <input type="text" 
+                           id="username" 
+                           name="username" 
+                           value="{{ user.username }}"
+                           required
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                
+                <!-- Email -->
+                <div class="space-y-2">
+                    <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+                    <input type="email" 
+                           id="email" 
+                           name="email" 
+                           value="{{ user.email }}"
+                           required
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                
+                <!-- Member Since (Read-only) -->
+                <div class="space-y-2">
+                    <label class="block text-sm font-medium text-gray-700">Member Since</label>
+                    <input type="text" 
+                           value="{{ user.created_at.strftime('%B %d, %Y') }}"
+                           readonly
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-50 text-gray-500">
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="flex items-center justify-between pt-6 border-t border-gray-200">
+                    <div class="flex space-x-3">
+                        <button type="submit" 
+                                class="bg-primary text-white px-6 py-2 rounded-md text-sm font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                            <i class="fas fa-save mr-2"></i>
+                            Save Changes
+                        </button>
+                        <a href="{{ url_for('profile.view_profile') }}" 
+                           class="bg-gray-300 text-gray-700 px-6 py-2 rounded-md text-sm font-medium hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
+                            Cancel
+                        </a>
+                    </div>
+                    
+                    <!-- Danger Zone -->
+                    <button type="button" 
+                            onclick="confirmDelete()"
+                            class="text-red-600 hover:text-red-800 text-sm font-medium">
+                        <i class="fas fa-trash mr-1"></i>
+                        Delete Account
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div id="delete-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div class="mt-3 text-center">
+            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
+                <i class="fas fa-exclamation-triangle text-red-600 text-xl"></i>
+            </div>
+            <h3 class="text-lg font-medium text-gray-900 mt-4">Delete Account</h3>
+            <div class="mt-2 px-7 py-3">
+                <p class="text-sm text-gray-500">
+                    Are you sure you want to delete your account? This action cannot be undone and will permanently delete all your notes and data.
+                </p>
+            </div>
+            <div class="items-center px-4 py-3">
+                <form method="POST" action="{{ url_for('profile.delete_profile') }}" class="inline">
+                    <button type="submit" 
+                            class="px-4 py-2 bg-red-600 text-white text-base font-medium rounded-md w-24 shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500">
+                        Delete
+                    </button>
+                </form>
+                <button onclick="closeDeleteModal()" 
+                        class="ml-3 px-4 py-2 bg-gray-300 text-gray-700 text-base font-medium rounded-md w-24 shadow-sm hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Profile image preview
+document.getElementById('profile_image').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const currentImage = document.getElementById('current-profile-image');
+            const initials = document.getElementById('profile-initials');
+            
+            if (currentImage) {
+                currentImage.src = e.target.result;
+            } else {
+                // Create new image element if none exists
+                const container = initials.parentElement;
+                container.innerHTML = `<img src="${e.target.result}" alt="Profile Preview" class="w-full h-full object-cover" id="current-profile-image">`;
+            }
+        };
+        reader.readAsDataURL(file);
+    }
+});
+
+// Delete confirmation modal
+function confirmDelete() {
+    document.getElementById('delete-modal').classList.remove('hidden');
+}
+
+function closeDeleteModal() {
+    document.getElementById('delete-modal').classList.add('hidden');
+}
+
+// Close modal when clicking outside
+document.getElementById('delete-modal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeDeleteModal();
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,214 @@
+{% extends "base.html" %}
+
+{% block title %}Create Note - NotesApp{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- Header -->
+    <div class="mb-8">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-3xl font-bold text-white">Create New Note</h1>
+                <p class="mt-2 text-white/80">Upload an image and let AI automatically extract and organize your notes</p>
+            </div>
+            <a href="{{ url_for('notes.list_notes') }}" 
+               class="btn-outline-light inline-flex items-center px-4 py-2 rounded-full text-sm font-medium">
+                <i class="fas fa-arrow-left mr-2"></i>
+                Back to Notes
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Form -->
+    <div class="bg-white shadow rounded-lg">
+        <div class="px-6 py-8">
+            <form method="POST" enctype="multipart/form-data" id="noteForm">
+                <!-- Image Upload Section -->
+                <div class="mb-8">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">
+                        <i class="fas fa-image mr-2 text-primary"></i>
+                        Upload Image
+                    </h3>
+                    
+                    <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors duration-200">
+                        <div class="space-y-4">
+                            <div class="flex justify-center">
+                                <i class="fas fa-cloud-upload-alt text-4xl text-gray-400"></i>
+                            </div>
+                            <div>
+                                <label for="image" class="cursor-pointer">
+                                    <span class="mt-2 block text-sm font-medium text-gray-900">
+                                        Upload handwritten notes image
+                                    </span>
+                                    <span class="mt-1 block text-sm text-gray-500">
+                                        PNG, JPG, JPEG up to 16MB
+                                    </span>
+                                </label>
+                                <input type="file" 
+                                       id="image" 
+                                       name="image" 
+                                       accept="image/*" 
+                                       required
+                                       class="sr-only"
+                                       onchange="handleFileSelect(this)">
+                            </div>
+                            <div class="flex justify-center">
+                                <button type="button" 
+                                        onclick="document.getElementById('image').click()"
+                                        class="btn-gradient inline-flex items-center px-4 py-2 text-sm font-medium">
+                                    <i class="fas fa-plus mr-2"></i>
+                                    Select Image
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Preview Area -->
+                    <div id="imagePreview" class="mt-4 hidden">
+                        <div class="relative">
+                            <img id="previewImg" src="" alt="Preview" class="max-w-full h-64 object-contain rounded-lg border">
+                            <button type="button" 
+                                    onclick="clearImage()"
+                                    class="absolute top-2 right-2 bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-red-600 transition-all duration-200 hover:scale-110 shadow-lg">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <p class="mt-2 text-sm text-gray-600">
+                            <i class="fas fa-info-circle mr-1"></i>
+                            AI will automatically extract text, clean it up, and organize it into appropriate subject notes
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Processing Status -->
+                <div id="processingStatus" class="mb-6 hidden">
+                    <div class="bg-blue-50 border border-blue-200 rounded-md p-4">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-cog fa-spin text-blue-500"></i>
+                            </div>
+                            <div class="ml-3">
+                                <h3 class="text-sm font-medium text-blue-800">Processing your image...</h3>
+                                <div class="mt-1 text-sm text-blue-700">
+                                    <p>• Extracting text from image</p>
+                                    <p>• Cleaning and formatting text</p>
+                                    <p>• Classifying content by subject</p>
+                                    <p>• Creating organized notes</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="flex justify-end space-x-3">
+                    <a href="{{ url_for('notes.list_notes') }}" 
+                       class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-full text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo_dye transition-colors">
+                        Cancel
+                    </a>
+                    <button type="submit" 
+                            id="submitBtn"
+                            disabled
+                            class="btn-gradient inline-flex items-center px-6 py-3 text-base font-medium rounded-full shadow-sm text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky_blue disabled:opacity-50 disabled:cursor-not-allowed">
+                        <i class="fas fa-magic mr-2"></i>
+                        <span id="submitText">Process & Create Notes</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function handleFileSelect(input) {
+    const file = input.files[0];
+    const submitBtn = document.getElementById('submitBtn');
+    const preview = document.getElementById('imagePreview');
+    const previewImg = document.getElementById('previewImg');
+    
+    if (file) {
+        // Show preview
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            previewImg.src = e.target.result;
+            preview.classList.remove('hidden');
+        };
+        reader.readAsDataURL(file);
+        
+        // Enable submit button
+        submitBtn.disabled = false;
+    } else {
+        // Hide preview and disable submit
+        preview.classList.add('hidden');
+        submitBtn.disabled = true;
+    }
+}
+
+function clearImage() {
+    const input = document.getElementById('image');
+    const preview = document.getElementById('imagePreview');
+    const submitBtn = document.getElementById('submitBtn');
+    
+    input.value = '';
+    preview.classList.add('hidden');
+    submitBtn.disabled = true;
+}
+
+// Handle form submission
+document.getElementById('noteForm').addEventListener('submit', function(e) {
+    const submitBtn = document.getElementById('submitBtn');
+    const submitText = document.getElementById('submitText');
+    const processingStatus = document.getElementById('processingStatus');
+    
+    // Show processing status
+    processingStatus.classList.remove('hidden');
+    
+    // Update button state
+    submitBtn.disabled = true;
+    submitText.textContent = 'Processing...';
+    
+    // The form will submit normally, this just provides user feedback
+});
+
+// Drag and drop functionality
+const dropZone = document.querySelector('.border-dashed');
+const fileInput = document.getElementById('image');
+
+['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+    dropZone.addEventListener(eventName, preventDefaults, false);
+});
+
+function preventDefaults(e) {
+    e.preventDefault();
+    e.stopPropagation();
+}
+
+['dragenter', 'dragover'].forEach(eventName => {
+    dropZone.addEventListener(eventName, highlight, false);
+});
+
+['dragleave', 'drop'].forEach(eventName => {
+    dropZone.addEventListener(eventName, unhighlight, false);
+});
+
+function highlight(e) {
+    dropZone.classList.add('border-primary', 'bg-primary-50');
+}
+
+function unhighlight(e) {
+    dropZone.classList.remove('border-primary', 'bg-primary-50');
+}
+
+dropZone.addEventListener('drop', handleDrop, false);
+
+function handleDrop(e) {
+    const dt = e.dataTransfer;
+    const files = dt.files;
+    
+    if (files.length > 0) {
+        fileInput.files = files;
+        handleFileSelect(fileInput);
+    }
+}
+</script>
+{% endblock %}
