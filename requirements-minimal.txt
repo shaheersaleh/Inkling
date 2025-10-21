@@ -1,0 +1,14 @@
+# Core Flask dependencies
+Flask==2.3.0
+Flask-Login==0.6.2
+Flask-SQLAlchemy==3.0.5
+Werkzeug==2.3.0
+
+# AI and ML - essential only
+google-cloud-vision==3.4.0
+sentence-transformers==2.2.2
+requests==2.31.0
+
+# Basic utilities
+Pillow==10.0.0
+python-dotenv==1.0.0

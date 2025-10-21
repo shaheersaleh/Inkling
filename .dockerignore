@@ -1,0 +1,6 @@
+# Add Docker files to gitignore but keep examples
+.env.docker
+google-credentials.json
+
+# Docker volumes (local development)
+docker-data/

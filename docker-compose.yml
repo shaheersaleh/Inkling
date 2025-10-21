@@ -1,0 +1,67 @@
+services:
+  # Main NotesApp service
+  notesapp:
+    build: .
+    container_name: notesapp
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=production
+      - SECRET_KEY=${SECRET_KEY:-your-secret-key-change-in-production}
+      - DATABASE_URL=sqlite:///instance/notes_app.db
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/google-credentials.json
+      - OLLAMA_HOST=http://ollama:11434
+      - OLLAMA_MODEL=llama3
+    volumes:
+      - ./instance:/app/instance
+      - ./uploads:/app/uploads
+      - ./vector_db:/app/vector_db
+      - ./google-credentials.json:/app/google-credentials.json:ro
+    depends_on:
+      - ollama
+    restart: unless-stopped
+    networks:
+      - notesapp-network
+
+  # Ollama service for AI functionality
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+    restart: unless-stopped
+    networks:
+      - notesapp-network
+    # Pull llama3 model on startup
+    command: >
+      sh -c "ollama serve &
+             sleep 10 &&
+             ollama pull llama3 &&
+             wait"
+
+  # ChromaDB service (optional - if you want separate vector DB)
+  chromadb:
+    image: chromadb/chroma:latest
+    container_name: chromadb
+    ports:
+      - "8000:8000"
+    volumes:
+      - chroma_data:/chroma/chroma
+    environment:
+      - CHROMA_HOST=0.0.0.0
+      - CHROMA_PORT=8000
+    restart: unless-stopped
+    networks:
+      - notesapp-network
+
+volumes:
+  ollama_data:
+  chroma_data:
+
+networks:
+  notesapp-network:
+    driver: bridge

@@ -49,6 +49,12 @@ A comprehensive web application for digitizing, organizing, and intelligently in
 - **Sentence Transformers** - Text embeddings
 - **Langchain** - RAG framework integration
 
+### Deployment
+- **Docker** - Containerization for easy deployment
+- **Docker Compose** - Multi-service orchestration
+- **Multi-stage builds** - Optimized container images
+- **Health checks** - Service monitoring and reliability
+
 ### Frontend
 - **HTML5 & CSS3**
 - **Tailwind CSS** - Utility-first CSS framework
@@ -138,6 +144,42 @@ python run.py
 ```
 
 The application will be available at `http://localhost:5000`
+
+## 🐳 Docker Deployment (Recommended)
+
+For easier setup and deployment, use Docker:
+
+### Quick Start with Docker
+```bash
+# Clone the repository
+git clone <repository-url>
+cd notesApp
+
+# Place your Google Cloud credentials
+cp /path/to/your/service-account-key.json ./google-credentials.json
+
+# Start all services
+./deploy.sh
+```
+
+Or manually:
+```bash
+# Copy environment template
+cp .env.docker .env
+
+# Build and start all services
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+```
+
+### Services
+- **NotesApp**: http://localhost:5000
+- **Ollama AI**: http://localhost:11434  
+- **ChromaDB**: http://localhost:8000
+
+For detailed Docker deployment instructions, see [DOCKER_DEPLOYMENT.md](DOCKER_DEPLOYMENT.md).
 
 ## 📖 Usage Guide
 
